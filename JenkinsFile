@@ -1,51 +1,32 @@
 pipeline {
     agent any
 
-    environment {
-        // AWS and Git settings
-        AWS_CREDENTIALS_ID = 'aws-s3-credentials' // Replace with your AWS credentials ID in Jenkins
-        AWS_REGION = 'us-east-1'                 // Replace with your AWS region
-        S3_BUCKET = 'xprepo-bucket'              // S3 bucket name
-        GIT_REPO = 'https://github.com/SYEDARSALANALIREHAN/Xprepo'
-        GIT_BRANCH = 'master'
-    }
-
     stages {
-        stage('Checkout Code') {
+        stage('Build') {
             steps {
-                echo 'Cloning Git repository...'
-                git branch: "${GIT_BRANCH}", url: "${GIT_REPO}"
-            }
-        }
-
-        stage('Build/Process Data') {
-            steps {
-                echo 'Processing data...'
-                // Add commands here if any build or data processing is needed
-                // Example: sh 'build-script.sh'
-            }
-        }
-
-        stage('Upload to S3') {
-            steps {
-                echo 'Uploading files to S3...'
-                withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
-                    // Upload all files from the repository to the root of the S3 bucket
-                    s3Upload(bucket: "${S3_BUCKET}", path: '', workingDir: '.')
+                script {
+                    sh '''
+                        ls
+                        npm install
+                        echo "Turning analytics off"
+                        ng build --prod
+                        ls dist
+                        cd dist && ls
+                        cd dist/angular-tour-of-heroes/browser && ls
+                    '''
                 }
             }
         }
-    }
 
-    post {
-        always {
-            echo 'Pipeline execution completed.'
-        }
-        success {
-            echo 'Pipeline executed successfully.'
-        }
-        failure {
-            echo 'Pipeline execution failed.'
+        stage('S3 Upload') {
+            steps {
+                withAWS(region: 'us-east-1', credentials: '8C94fa09-4954-4498-aac9-838d930a9170') {
+                    sh '''
+                        ls -la
+                        aws s3 cp dist/angular-tour-of-heroes/browser/ s3://xprepo-bucket/ --recursive
+                    '''
+                }
+            }
         }
     }
 }
