@@ -20,7 +20,7 @@ pipeline {
 
         stage('S3 Upload') {
             steps {
-                withAWS(region: 'us-east-1', credentials: '904061d4-f61d-4f1a-96f0-7dc23b25e9a0') {
+                withAWS(region: 'us-east-1', credentials: '984de098-9c5b-4d72-a3dc-6c6aa8744c00') {
                     sh '''
                         ls -la
                         aws s3 cp dist/angular-tour-of-heroes/browser/ s3://xprepo-bucket/ --recursive
