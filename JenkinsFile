@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        // AWS and Git settings
+        AWS_CREDENTIALS_ID = 'aws-s3-credentials' // Replace with your AWS credentials ID in Jenkins
+        AWS_REGION = 'us-east-1'                 // Replace with your AWS region
+        S3_BUCKET = 'xprepo-bucket'              // S3 bucket name
+        GIT_REPO = 'https://github.com/SYEDARSALANALIREHAN/Xprepo'
+        GIT_BRANCH = 'master'
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo 'Cloning Git repository...'
+                git branch: "${GIT_BRANCH}", url: "${GIT_REPO}"
+            }
+        }
+
+        stage('Build/Process Data') {
+            steps {
+                echo 'Processing data...'
+                // Add commands here if any build or data processing is needed
+                // Example: sh 'build-script.sh'
+            }
+        }
+
+        stage('Upload to S3') {
+            steps {
+                echo 'Uploading files to S3...'
+                withAWS(credentials: "${AWS_CREDENTIALS_ID}", region: "${AWS_REGION}") {
+                    // Upload all files from the repository to the root of the S3 bucket
+                    s3Upload(bucket: "${S3_BUCKET}", path: '', workingDir: '.')
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        success {
+            echo 'Pipeline executed successfully.'
+        }
+        failure {
+            echo 'Pipeline execution failed.'
+        }
+    }
+}
