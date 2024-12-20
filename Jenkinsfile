@@ -2,19 +2,9 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                script {
-                    sh '''
-                        ls
-                        npm install
-                        echo "Turning analytics off"
-                        ng build --prod
-                        ls dist
-                        cd dist && ls
-                        cd dist/angular-tour-of-heroes/browser && ls
-                    '''
-                }
+                checkout scm  // Checks out the source code from your GitHub repo
             }
         }
 
@@ -22,8 +12,14 @@ pipeline {
             steps {
                 withAWS(region: 'us-east-1', credentials: '984de098-9c5b-4d72-a3dc-6c6aa8744c00') {
                     sh '''
+                        # List contents to verify files are available
                         ls -la
-                        aws s3 cp dist/angular-tour-of-heroes/browser/ s3://xprepo-bucket/ --recursive
+
+                        # Upload the index.html file to the S3 bucket
+                        aws s3 cp index.html s3://xprepo-bucket/ --recursive
+
+                        # Optionally, you can upload additional assets (like CSS, JS, etc.)
+                        # aws s3 cp ./assets/ s3://xprepo-bucket/assets/ --recursive
                     '''
                 }
             }
