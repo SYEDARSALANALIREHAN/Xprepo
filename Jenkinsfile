@@ -15,8 +15,8 @@ pipeline {
                         # List contents to verify files are available
                         ls -la
 
-                        # Upload the index.html file to the S3 bucket
-                        aws s3 cp index.html s3://xprepo-bucket/ --recursive
+                        # Upload the index.html file to the S3 bucket 
+                        aws s3 cp index.html s3://xprepo-bucket/
 
                         # Optionally, you can upload additional assets (like CSS, JS, etc.)
                         # aws s3 cp ./assets/ s3://xprepo-bucket/assets/ --recursive
